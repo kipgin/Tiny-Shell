@@ -156,7 +156,7 @@ int execute_command(command_t *cmd) {
         }
         
         if (cmd->background) {
-            // Background process
+            // Back process
             printf("[%d] %d %s &\n", job_id, pid, command_str);
         } else {
             // Foreground process
