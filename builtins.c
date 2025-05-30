@@ -1,50 +1,210 @@
+#define _POSIX_C_SOURCE 200809L // do cac hang so cua "time.h" duoc su dung theo chuan POSIX --> chuyen kieu --> compiler moi hieu
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "variables.h"
+#include <time.h>
+#include <sys/wait.h>
+#include <dirent.h>
 #include "builtins.h"
+#include "jobs.h" 
 
-void handle_cd(const char* path) {
-    if (chdir(path) != 0) {
-        perror("cd failed");
+void handle_cd(const char*path){
+    if(chdir(path) != 0){
+        perror("Change Directory failed.");
     }
 }
 
-void handle_exit() {
-    printf("Exiting shell. Goodbye!\n");
-    exit(0);
+void handle_exit(int argc, char*argv[]){
+    int exit_code=0;
+    if(argc > 1){
+        exit_code=atoi(argv[1]);
+    }
+    printf("Exiting shell with code %d.\n",exit_code);
+    exit(exit_code);
 }
 
-void handle_help_builtins() {
-    printf("TinyShell Help:\n");
-    printf("  cd <dir>      - Change directory\n");
-    printf("  exit          - Exit shell\n");
-    printf("  help          - Display this help message\n");
-    printf("  echo <args>   - Print arguments\n");
-    printf("  export NAME=VALUE - Set environment variable\n");
+void handle_help(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("Available built-in commands:\n");
+        printf("  cd <dir>              - Change directory\n");
+        printf("  exit [exit_code]      - Exit shell with an optional exit code\n");
+        printf("  help [command]        - Display help for a command\n");
+        printf("  date [format]         - Display current date/time (format optional)\n");
+        printf("  time <command> [args] - Execute a command and measure elapsed time\n");
+        printf("  ls [option] [dir]     - List files in directory (current as default)\n");
+        printf("  echo $PATH            - Print PATH environment variable\n");
+        printf("  export PATH=<value>   - Set PATH environment variable\n");
+        return;
+    }
+
+    if (strcmp(argv[1], "exit") == 0) {
+        printf("exit [exit_code]: Exit the shell with an optional exit code.\n");
+    } 
+    else if (strcmp(argv[1], "date") == 0) {
+        printf("date [format]: Display current date and time. Format uses strftime() directives.\n");
+    } 
+    else if (strcmp(argv[1], "time") == 0) {
+        printf("time <command> [args]: Execute a command and display its elapsed time.\n");
+    } 
+    else if (strcmp(argv[1], "ls") == 0) {
+        printf("ls [option] [dir]: List files in a directory. The option is not processed in this built-in.\n");
+    }
+    else if (strcmp(argv[1], "echo") == 0) {
+        printf("echo $PATH: Print the value of PATH environment variable.\n");
+    } 
+    else if (strcmp(argv[1], "export") == 0) {
+        printf("export PATH=<value>: Set the PATH environment variable to a new value.\n");
+    }
+    else if(strcmp(argv[1],"cd")==0){
+        printf("Change the shell working directory.Change the current directory to DIR. The default DIR is the value of the HOME shell variable.\n");
+    } 
+    else {
+        printf("No help available for command: %s\n", argv[1]);
+    }
+}
+
+// time + command --> length >= 2
+
+void handle_time(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: time <command> [args ...]\n");
+        return;
+    }
+
+    struct timespec start, end;
+
+    // khoi tao struct timespec start
+    if (clock_gettime(CLOCK_MONOTONIC, &start) == -1) {
+        perror("clock_gettime");
+        return;
+    }
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return;
+    }
+
+    if (pid == 0) {
+
+        execvp(argv[1], &argv[1]);
+        perror("execvp");
+        exit(1);
+
+    } 
+    else {
+        // them vao danh sach tien trinh
+        int job_id = add_job(pid, "time command");
+        
+        // job_id --> foreground process
+        bring_to_foreground(job_id);
+
+        //khoi tao struct timespect end
+        if (clock_gettime(CLOCK_MONOTONIC, &end) == -1) {
+            perror("clock_gettime");
+            return;
+        }
+
+        //answer : 
+        double elapsed = (end.tv_sec - start.tv_sec) +
+                         (end.tv_nsec - start.tv_nsec) / 1e9; // nanosecond
+        printf("Elapsed time: %.3f seconds\n", elapsed);
+    }
+    
 }
 
 
-// phan nay giong ham  void execute_variable() trong variable.c
-void handle_echo(char** hehe) {
-    for (int i = 1; hehe[i] != NULL; i++) {
-        if (hehe[i][0] == '$') {
-            char* val = get_variable(hehe[i] + 1);
-            if (val) printf("%s ", val);
-        } else {
-            printf("%s ", hehe[i]);
+//cu phap ls
+
+// ls                 # Liệt kê file/thư mục trong thư mục hiện tại
+// ls -l              # Hiển thị chi tiết
+// ls -a              # Hiển thị cả file ẩn
+// ls -lh             # Hiển thị chi tiết, kích thước dễ đọc
+// ls /etc            # Liệt kê file/thư mục trong /etc
+// ls -l /home/kipgin # Hiển thị chi tiết trong thư mục /home/kipgin
+// ls -alR            # Hiển thị tất cả, kể cả file ẩn và đệ quy thư mục con
+
+void handle_ls(int argc, char* argv[]) {
+    const char* dir;
+    // co 1 tham so
+    if(argc < 1){
+        fprintf(stderr,"Error");
+    }
+    if (argc < 2) {
+        dir = ".";
+    } 
+    else {
+        // Nếu tham số thứ nhất là option (bắt đầu bằng '-') và có tham số thứ hai, lấy thư mục từ argv[2].
+
+        // ls -
+        if (argv[1][0] == '-') {
+            if (argc < 3){
+                dir = ".";
+            }
+
+            // ls -l path
+            else{
+                dir = argv[2];
+            }
+        } 
+        // ls /etc
+        else {
+            dir = argv[1];
         }
     }
+    
+    DIR* d = opendir(dir);
+    if (!d) {
+        perror("opendir");
+        return;
+    }
+    struct dirent *entry;
+    while ((entry = readdir(d)) != NULL) {
+        // Bỏ qua file ẩn (bắt đầu bằng '.')
+        
+        if (entry->d_name[0] != '.')
+            printf("%s  ", entry->d_name);
+    }
     printf("\n");
+    closedir(d);
 }
 
-void handle_export(const char* hehe) {
-    char name[MAX_VAR_NAME], value[MAX_VAR_VALUE];
+// echo & export da co o phan variable nhung van lam lai :D
 
-    if (sscanf(hehe, "%63[^=]=%255[^=]", name, value) == 2) {
-        set_variable(name, value);
-    } else {
-        fprintf(stderr, "export: failed\n");
+void handle_echo_path() {
+    char *path = getenv("PATH");
+    if (path)
+        printf("%s\n", path);
+    else
+        printf("PATH not set.\n");
+}
+
+
+void handle_export(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: export PATH=<value>\n");
+        return;
     }
+    // export PATH=/usr/bin:/bin
+    // tim ki tu '=' trong argv[1]
+    char *arg = argv[1];
+    char *equalSign = strchr(arg, '=');
+    if (!equalSign) {
+        fprintf(stderr, "export: invalid format, expected PATH=<value>\n");
+        return;
+    }
+    *equalSign = '\0';
+    char* var = arg;
+    char* value = equalSign + 1;
+    if (strcmp(var, "PATH") != 0) {
+        fprintf(stderr, "export: only PATH supported in this built-in\n");
+        return;
+    }
+    if (setenv("PATH", value, 1) != 0) {
+        perror("setenv");
+        return;
+    }
+    printf("PATH updated to: %s\n", value);
 }

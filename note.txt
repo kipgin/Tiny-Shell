@@ -1,0 +1,19 @@
+1. Tiến trình:
+Ở đây, ta ánh xạ PID -> Job_id --> coi như chỉ xử lí trên job_id
+
+
+List processes:
+Sử dụng lệnh ps, top hoặc htop để xem danh sách các tiến trình đang chạy.
+
+Kill:
+Sử dụng lệnh kill <PID> để gửi tín hiệu kết thúc tiến trình hoặc killall <tên tiến trình> để kết thúc tất cả tiến trình có tên tương ứng.
+
+Stop (tạm dừng):
+Sử dụng kill -STOP <PID> để dừng một tiến trình (gửi tín hiệu SIGSTOP).
+
+Resume:
+Sử dụng kill -CONT <PID> để tiếp tục một tiến trình đã bị dừng (gửi tín hiệu SIGCONT).
+
+2. Signal :
+
+Ctrl + C; 
