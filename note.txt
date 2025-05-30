@@ -14,6 +14,23 @@ Sử dụng kill -STOP <PID> để dừng một tiến trình (gửi tín hiệu
 Resume:
 Sử dụng kill -CONT <PID> để tiếp tục một tiến trình đã bị dừng (gửi tín hiệu SIGCONT).
 
+
+note : sửa lại hàm execute_job trong jobs.c --> tại kil -9 hoặc kill -18 thì vẫn ăn
 2. Signal :
 
-Ctrl + C; 
+sighandler_t signal(int signum, sighandler_t handler);
+1. signum - Loại tín hiệu:
+SIGINT (2): Ctrl+C - Interrupt signal
+SIGQUIT (3): Ctrl+\ - Quit signal
+SIGTSTP (20): Ctrl+Z - Terminal stop signal
+SIGKILL (9): Kill signal (không thể bắt)
+SIGTERM (15): Termination signal
+...
+2. handler - Cách xử lý:
+Hàm tự định nghĩa: void my_handler(int sig)
+SIG_IGN: Bỏ qua tín hiệu
+SIG_DFL: Xử lý mặc định của hệ thống
+
+Giá trị trả về:
+Thành công: Trả về handler trước đó
+Lỗi: Trả về SIG_ERR (-1)

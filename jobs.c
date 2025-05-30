@@ -1,5 +1,5 @@
 #include "jobs.h"
-#include "signal.h"
+#include "signals.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -169,22 +169,34 @@ void execute_job(const char** tokens, int num_tokens) {
             fprintf(stderr, "Usage: kill <job_id>\n");
             return;
         }
-        if(strcmp(tokens[1],"-SIGCONT")==0 || atoi(tokens[1]+1)==18){
+        if(strcmp(tokens[1],"-SIGCONT")==0 || (tokens[1][0]=='-' && atoi(tokens[1]+1)==18)){
+            if(num_tokens < 3){
+                fprintf(stderr,"Usage: kill -SIGCONT <job_id> or kill -number(int) <job_id>\n");
+                return;
+            }
+            
             int job_id = atoi(tokens[2]);
             resume_job(job_id);
         }
-        else if(strmcp(tokens[1],"-SIGKILL")==0 || atoi(tokens[1]+1)==9){
+        else if(strcmp(tokens[1],"-SIGKILL")==0 || (tokens[1][0] == '-' && atoi(tokens[1]+1)==9)){
+            if(num_tokens < 3){
+                fprintf(stderr,"Usage: kill -SIGINT <job_id> or kill -number(int) <job_id>\n");
+                return;
+            }
+            
             int job_id=atoi(tokens[2]);
             kill_job(job_id);
+            printf("\n");
         }
         else if( atoi(tokens[1]) >= 0  && atoi(tokens[1]) <= MAX_JOBS){
             kill_job(atoi(tokens[1]));
+            printf("\n");
         }
         else{
-            fprintf(stderr,"Killed Process failed.");
+            fprintf(stderr,"Killed Process failed.\n");
         }
     }
     else {
-        fprintf(stderr, "Unknown job command: %s\n", tokens[0]);
+        fprintf(stderr, "Unknown process command: %s\n", tokens[0]);
     }
 }

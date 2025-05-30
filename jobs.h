@@ -1,10 +1,11 @@
 #ifndef JOBS_H
 #define JOBS_H
 #include <unistd.h>
+#include<sys/types.h>
 #define MAX_JOBS 128
 
 typedef struct {
-    pid_t pid;
+    __pid_t pid;
     char command[256];
     int active;
 } Job;

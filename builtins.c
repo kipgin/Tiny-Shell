@@ -115,6 +115,20 @@ void handle_time(int argc, char* argv[]) {
     
 }
 
+void handle_date(int argc, char* argv[]) {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    char buffer[100];
+
+    
+    if (argc > 1) {
+        strftime(buffer, sizeof(buffer), argv[1], t);
+    } else {
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", t);
+    }
+    printf("%s\n", buffer);
+}
+
 
 //cu phap ls
 

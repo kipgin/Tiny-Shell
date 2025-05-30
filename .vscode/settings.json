@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "jobs.h": "c"
+        "jobs.h": "c",
+        "builtins.h": "c"
     }
 }

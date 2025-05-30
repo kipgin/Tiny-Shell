@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <sys/wait.h>
+//#include <sys/wait.h>
+#include <sys/types.h>
 int main(){
-    __pid_t pid = fork();
-    if(pid == 0 ){
-        printf("chao , tien trinh con");
-    }
-    else{
-        waitpid(pid,NULL,0);
-        printf("chao, tien trinh cha");
-    }
+    char q[4];
+    int a=5;
+    printf("%d",q);
+    strdup(q);
+
 }

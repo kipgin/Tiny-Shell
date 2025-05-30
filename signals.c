@@ -20,12 +20,14 @@ void sigint_handler(int sig) {
         printf("\n[SIGINT] Terminating foreground process [%d]...\n", fg_job_id);
         kill_job(fg_job_id);
         clear_foreground_job_id();
-    } else {
+    } 
+    else {
         printf("\nNo foreground process to terminate.\n");
         printf("myshell> ");
         fflush(stdout);
     }
 }
+
 
 void init_signals(void) {
     if (signal(SIGINT, sigint_handler) == SIG_ERR) {
