@@ -36,6 +36,15 @@ int add_job(pid_t pid, const char * command){
     return -1;
 }
 
+int find_job_id_by_pid(pid_t pid) {
+    for (int i = 0; i < MAX_JOBS; i++) {
+        if (jobs[i].active && jobs[i].pid == pid) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void remove_job(pid_t pid){
     for(int i = 0; i < MAX_JOBS;i++){
         if(jobs[i].pid == pid){
@@ -85,7 +94,7 @@ void bring_to_foreground(int job_id){
 
     clear_foreground_job_id();
     remove_job(pid);
-    printf("Process [%d] finished.\n", pid);
+    printf("Process [%d] finished.\n", job_id);
 }
 
 void resume_job(int job_id){
@@ -101,7 +110,7 @@ void resume_job(int job_id){
     }
 
     jobs[job_id].active=1;
-    printf("Process [%d] resumed.\n", pid);
+    printf("Process [%d] resumed.\n", job_id);
 }
 
 void stop_job(int job_id){
@@ -115,7 +124,7 @@ void stop_job(int job_id){
         return;
     }
     jobs[job_id].active=1;
-    printf("Process [%d] stopped",pid);
+    printf("Process [%d] stopped",job_id);
 }
 
 void kill_job(int job_id){
@@ -128,7 +137,7 @@ void kill_job(int job_id){
         perror("SIGKILL failed, cannot kill process.");
         return;
     }
-    printf("Process [%d] killed.",pid);
+    printf("Process [%d] killed.",job_id); 
     remove_job(pid);
 }
 

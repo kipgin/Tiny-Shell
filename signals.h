@@ -13,6 +13,8 @@ void clear_foreground_job_id(void);
 // xu li signal SIGINT (Ctrl+C)
 void sigint_handler(int sig);
 
+void sigchld_handler(int sig);
+
 // khoi tao signals
 void init_signals(void);
 

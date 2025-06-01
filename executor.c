@@ -129,15 +129,16 @@ int execute_command(command_t *cmd) {
         // tien trinh con
         
         // if redirection
+
         if (setup_redirection(cmd) < 0) {
             exit(1);
         }
-        
         // execute command
         execvp(cmd->cmd, cmd->args);
         perror("execvp");
         exit(1);
-    } else {
+    } 
+    else {
         // tien trinh cha
         
         // them process vao danh sach job da cai dat
@@ -158,10 +159,12 @@ int execute_command(command_t *cmd) {
         if (cmd->background) {
             // Back process
             printf("[%d] %d %s &\n", job_id, pid, command_str);
+            
         } else {
             // Foreground process
             bring_to_foreground(job_id);
         }
+
     }
     
     return 0;

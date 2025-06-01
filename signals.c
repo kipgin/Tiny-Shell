@@ -1,8 +1,10 @@
 #include "signals.h"
 #include "jobs.h"
+
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 // global variable lưu job_id của foreground process
 volatile int fg_job_id = -1;
@@ -23,10 +25,26 @@ void sigint_handler(int sig) {
     } 
     else {
         printf("\nNo foreground process to terminate.\n");
-        printf("myshell> ");
+        printf("tinyshell> ");
         fflush(stdout);
     }
 }
+void sigchld_handler(int sig) {
+    int status;
+    pid_t pid;
+
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+            int job_id=find_job_id_by_pid(pid);
+            if (job_id != -1) {
+                printf("\n[Background] Process [%d] finished.\ntinyshell> ", job_id);
+                fflush(stdout);
+                remove_job(pid);
+                
+            
+        }
+    }
+}
+
 
 
 void init_signals(void) {
@@ -43,4 +61,8 @@ void init_signals(void) {
     if (signal(SIGTSTP, SIG_IGN) == SIG_ERR) {
         perror("signal SIGTSTP");
     }
+    
+    signal(SIGCHLD, sigchld_handler);
+
+    
 }

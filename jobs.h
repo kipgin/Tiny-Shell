@@ -10,8 +10,12 @@ typedef struct {
     int active;
 } Job;
 
+
+
 //khoi tao danh sach cac tien trinh
 void init_jobs();
+
+int find_job_id_by_pid(pid_t pid);
 
 //them tien trinh vao danh sach tren ( theo chien luoc First-Fit)
 int add_job(pid_t pid, const char* command);
