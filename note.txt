@@ -5,6 +5,7 @@
 List processes:
 Sử dụng lệnh ps, top hoặc htop để xem danh sách các tiến trình đang chạy.
 
+
 Kill:
 Sử dụng lệnh kill <PID> để gửi tín hiệu kết thúc tiến trình hoặc killall <tên tiến trình> để kết thúc tất cả tiến trình có tên tương ứng.
 

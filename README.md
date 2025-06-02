@@ -8,3 +8,17 @@ Hướng dẫn sử dụng :
 `gcc -o mysh main.c parser.c executor.c jobs.c signals.c builtins.c -Wall`  
 - Bước 2: Gõ vào terminal:  
 `./mysh`  
+  
+### Một số lệnh cài đặt :  
+1. Các thao tác với thư mục :  
+- Change directory: `cd /duong/dan`  
+- Lùi về thư mục cha: `cd -`  
+- Quay lại thư mục trước đó: `cd -`  
+- Xem thư mục hiện tại: `pwd`  
+- Tạo thư mục tên newfolder: `mkdir newfolder`  
+- Xóa thư mục rỗng myfolder: `rmdir myfolder`  
+- Xóa thư mục và tất cả thông tin trong đó: `rm -r newfolder`  
+- Liệt kê thư mục: `ls`, nếu chi tiết hơn thì sử dụng `ls -l`, còn nếu muốn hiển thị các file ẩn thì sử dụng `ls -a`  
+- Hiển thị cây cấu trúc thư mục: `tree`  
+
+  
