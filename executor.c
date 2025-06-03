@@ -2,6 +2,7 @@
 #include "builtins.h"
 #include "jobs.h"
 #include "signals.h"
+#include "variables.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,10 +50,10 @@ int execute_builtin(command_t *cmd) {
     } else if (strcmp(cmd->cmd, "ls") == 0) {
         handle_ls(argc, cmd->args);
     } else if (strcmp(cmd->cmd, "echo") == 0) {
-        if (argc > 1 && strcmp(cmd->args[1], "$PATH") == 0) {
-            handle_echo_path();
+        if (argc > 1) {
+            handle_echo_path(argc,cmd->args);
         } else {
-            printf("echo: only $PATH supported\n");
+            printf("echo failed\n");
         }
     } else if (strcmp(cmd->cmd, "export") == 0) {
         handle_export(argc, cmd->args);

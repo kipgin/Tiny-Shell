@@ -2,6 +2,7 @@
     "files.associations": {
         "stdio.h": "c",
         "jobs.h": "c",
-        "builtins.h": "c"
+        "builtins.h": "c",
+        "parser.h": "c"
     }
 }

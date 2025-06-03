@@ -17,7 +17,7 @@ int main() {
     // Khởi tạo
     init_jobs();
     init_signals();
-    
+    load_variables();
     printf("Tiny Shell started. Type 'help' for available commands.\n");
     
     while (1) {

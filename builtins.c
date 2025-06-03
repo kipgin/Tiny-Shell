@@ -8,7 +8,12 @@
 #include <sys/wait.h>
 #include <dirent.h>
 #include "builtins.h"
-#include "jobs.h" 
+#include "jobs.h"
+#include "variables.h"
+#define MAX_ENVS 160
+
+static char*temp_envs_var[MAX_ENVS];
+static int num_envs_var=0;
 
 void handle_cd(const char*path){
     if(chdir(path) != 0){
@@ -187,22 +192,43 @@ void handle_ls(int argc, char* argv[]) {
 
 // echo & export da co o phan variable nhung van lam lai :D
 
-void handle_echo_path() {
-    char *path = getenv("PATH");
-    if (path)
-        printf("%s\n", path);
-    else
-        printf("PATH not set.\n");
+void handle_echo_path(int argc, char* argv[]) {
+    if (argc < 2 || argv[1] == NULL) {
+        printf("%d\n",argc);
+        fprintf(stderr, "Usage: echo $VAR or echo STRING\n");
+        return;
+    }
+    if(argv[1][0] != '$'){
+        printf("%s\n", argv[1]);
+    }
+    else if(strcmp(argv[1]+1, "PATH") == 0){
+        printf("%s\n", getenv("PATH"));
+    }
+    else{
+        char* name = argv[1] + 1;
+        char* variable = get_variable(name);
+        for(int i = 0 ; i < num_envs_var ;i++){
+            if(strcmp(name,temp_envs_var[i])==0){
+                printf("%s\n",temp_envs_var[i]);
+                return;
+            }
+        }
+        if(variable == NULL){
+            printf("%s\n",name);
+        }
+        else{
+            printf("%s\n",variable);
+        }
+    }
 }
 
 
 void handle_export(int argc, char* argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: export PATH=<value>\n");
+        fprintf(stderr, "Usage: export VARIABLE=<value>\n");
         return;
     }
-    // export PATH=/usr/bin:/bin
-    // tim ki tu '=' trong argv[1]
+    
     char *arg = argv[1];
     char *equalSign = strchr(arg, '=');
     if (!equalSign) {
@@ -212,13 +238,40 @@ void handle_export(int argc, char* argv[]) {
     *equalSign = '\0';
     char* var = arg;
     char* value = equalSign + 1;
-    if (strcmp(var, "PATH") != 0) {
-        fprintf(stderr, "export: only PATH supported in this built-in\n");
+    if(value==NULL){
+        printf("No value to assign.\n");
+    }
+    int flag=0;
+    if(argc == 3){
+        if(strcmp(argv[2],"save")==0){
+            set_variable(var,value);
+            return;
+        }
+        else{
+            printf("Try export VAR=VAL or export VAR=VAL save.\n");
+        }
+    }
+    for(int i = 0 ; i < num_envs_var ;i++){
+        if(strcmp(var,temp_envs_var[i])==0){
+            temp_envs_var[i] = (char*)malloc(sizeof(char)*strlen(value));
+            if(temp_envs_var[i]==NULL){
+                printf("Failed to set variable :(\n");
+                return;
+            }
+            else{
+                strcpy(temp_envs_var[i],value);
+            }
+            flag=1;
+        }
+    }
+    if(flag){
         return;
     }
-    if (setenv("PATH", value, 1) != 0) {
-        perror("setenv");
-        return;
+    temp_envs_var[num_envs_var] = (char*)malloc(sizeof(char)*strlen(value));
+    if(temp_envs_var[num_envs_var]==NULL){
+        printf("Cannot export variable :(\n");
     }
-    printf("PATH updated to: %s\n", value);
+    strcpy(temp_envs_var[num_envs_var],value);
+    num_envs_var++;
+
 }

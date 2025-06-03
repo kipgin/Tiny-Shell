@@ -84,10 +84,10 @@ void execute_variables(char* line){
         }
         sec_token+=1;
         if(get_variable(sec_token) == NULL){
-            printf("%[^\n]s",sec_token);
+            printf("%s\n",sec_token);
             return;
         }
-        printf("%[^\n]s",get_variable(sec_token));
+        printf("%s\n",get_variable(sec_token));
     }
     
 }
