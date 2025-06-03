@@ -13,7 +13,7 @@ int main() {
     char *args[MAX_ARGS];
 
     while (1) {
-        printf("myshell> ");
+        printf("tinyshell> ");
         fflush(stdout);
 
         // Đọc lệnh
@@ -70,6 +70,6 @@ int main() {
         }
     }
 
-    printf("myshell exit.\n");
+    printf("tinyshell exit.\n");
     return 0;
 }
