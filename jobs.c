@@ -123,8 +123,8 @@ void stop_job(int job_id){
         perror("SIGSTOP failed, cannot stop process.");
         return;
     }
-    jobs[job_id].active=1;
-    printf("Process [%d] stopped",job_id);
+    jobs[job_id].active=0;
+    printf("Process [%d] stopped\n",job_id);
 }
 
 void kill_job(int job_id){
