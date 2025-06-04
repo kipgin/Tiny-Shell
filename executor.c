@@ -18,6 +18,7 @@ bool is_builtin(const char *cmd) {
             strcmp(cmd, "help") == 0 ||
             strcmp(cmd, "date") == 0 ||
             strcmp(cmd, "time") == 0 ||
+            strcmp(cmd,"bash") ==0 ||
             strcmp(cmd, "ls") == 0 ||
             strcmp(cmd, "echo") == 0 ||
             strcmp(cmd, "export") == 0 ||
@@ -39,25 +40,37 @@ int execute_builtin(command_t *cmd) {
     if (strcmp(cmd->cmd, "cd") == 0) {
         const char *path = (argc > 1) ? cmd->args[1] : getenv("HOME");
         handle_cd(path ? path : ".");
-    } else if (strcmp(cmd->cmd, "exit") == 0) {
+    } 
+    else if (strcmp(cmd->cmd, "exit") == 0) {
         handle_exit(argc, cmd->args);
-    } else if (strcmp(cmd->cmd, "help") == 0) {
+    } 
+    else if (strcmp(cmd->cmd, "help") == 0) {
         handle_help(argc, cmd->args);
-    } else if (strcmp(cmd->cmd, "date") == 0) {
+    } 
+    else if (strcmp(cmd->cmd, "date") == 0) {
         handle_date(argc, cmd->args);
-    } else if (strcmp(cmd->cmd, "time") == 0) {
+    } 
+    else if (strcmp(cmd->cmd, "time") == 0) {
         handle_time(argc, cmd->args);
-    } else if (strcmp(cmd->cmd, "ls") == 0) {
+    } 
+    else if (strcmp(cmd->cmd, "ls") == 0) {
         handle_ls(argc, cmd->args);
-    } else if (strcmp(cmd->cmd, "echo") == 0) {
+
+    } 
+    else if(strcmp(cmd->cmd,"bash")==0){
+        handle_bash(argc,cmd->args);
+    }
+    else if (strcmp(cmd->cmd, "echo") == 0) {
         if (argc > 1) {
             handle_echo_path(argc,cmd->args);
         } else {
             printf("echo failed\n");
         }
-    } else if (strcmp(cmd->cmd, "export") == 0) {
+    } 
+    else if (strcmp(cmd->cmd, "export") == 0) {
         handle_export(argc, cmd->args);
-    } else {
+    } 
+    else {
         // Job control commands
         const char *tokens[MAX_ARGS];
         for (int i = 0; i < argc && i < MAX_ARGS; i++) {

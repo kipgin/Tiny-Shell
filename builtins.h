@@ -7,6 +7,7 @@ void handle_help(int argc, char* argv[]);
 void handle_date(int argc, char* argv[]);
 void handle_time(int argc, char* argv[]);
 void handle_ls(int argc, char* argv[]);
+void handle_bash(int argc, char* argv[]);
 void handle_echo_path();
 void handle_export(int argc, char* argv[]);
 

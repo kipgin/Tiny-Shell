@@ -33,14 +33,23 @@ void handle_exit(int argc, char*argv[]){
 void handle_help(int argc, char* argv[]) {
     if (argc < 2) {
         printf("Available built-in commands:\n");
-        printf("  cd <dir>              - Change directory\n");
-        printf("  exit [exit_code]      - Exit shell with an optional exit code\n");
-        printf("  help [command]        - Display help for a command\n");
-        printf("  date [format]         - Display current date/time (format optional)\n");
-        printf("  time <command> [args] - Execute a command and measure elapsed time\n");
-        printf("  ls [option] [dir]     - List files in directory (current as default)\n");
-        printf("  echo $PATH            - Print PATH environment variable\n");
-        printf("  export PATH=<value>   - Set PATH environment variable\n");
+        printf("  cd <dir>                 - Change directory\n");
+        printf("  exit [exit_code]         - Exit shell with an optional exit code\n");
+        printf("  help [command]           - Display help for a command\n");
+        printf("  date [format]            - Display current date/time (format optional)\n");
+        printf("  time <command> [args]    - Execute a command and measure elapsed time\n");
+        printf("  ls [option] [dir]        - List files in directory (current as default)\n");
+        printf("  jobs                     - List processes\n");
+        printf("  stop <job_id>            - Stop the process with id=job_id\n");
+        printf("  fg <job_id>              - Bring process with id=job_id to foreground\n");
+        printf("  bg <job_id>              - Continue process with id=job_id which is currently background\n");
+        printf("  kill <job_id>            - Kill process with id=job_id\n");
+        printf("  kil -SIGINT <job_id>     - Kill process with id=job_id\n");
+        printf("  kill -SIGCONT <job_id>   - Continue stopped process in background with id=job_id\n");
+        printf("  bash [filename]          - Execute *.sh file\n");
+        printf("  echo $PATH               - Print PATH environment variable\n");
+        printf("  export PATH=<value>      - Set PATH environment variable\n");
+        printf("  export PATH=<value> save - Set and save PATH environment variable\n");
         return;
     }
 
@@ -188,6 +197,33 @@ void handle_ls(int argc, char* argv[]) {
     }
     printf("\n");
     closedir(d);
+}
+
+void handle_bash(int argc,char* argv[]){
+    if(argc < 2 ){
+        printf("Usage: bash [filenname].sh .\n");
+        return;
+    }
+    if(strstr(argv[1],".sh")==NULL){
+        printf("Must be a .sh file.\n");
+        return;
+    }
+    if(access(argv[1],F_OK) != 0){
+        printf("Cannot access file.\n");
+        return;
+    }
+    pid_t pid =fork();
+    if(pid < 0){
+        printf("Fork failed!\n");
+    }
+    if(pid == 0){
+        execl("/bin/bash", "bash", argv[1], (char *)NULL);
+        exit(1);
+    }
+    else{
+        waitpid(pid,NULL,0);
+    }
+
 }
 
 // echo & export da co o phan variable nhung van lam lai :D
