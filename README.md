@@ -1,3 +1,4 @@
+
 # Tiny-Shell IT3070
 
 **Thành viên nhóm:**
@@ -68,6 +69,17 @@ gcc -o mysh main.c parser.c executor.c jobs.c signals.c builtins.c variables.c -
 | `stop <job_id>` | Dừng tiến trình |
 | `kill -SIGCONT <job_id>` | Tiếp tục tiến trình đang ở background |
 | `resume <PID>` | Tiếp tục tiến trình đã dừng |
+| `bg <job_id>` | Tiếp tục tiến trình đang dừng ở background |
+| `fg <job_id>` | Chuyển tiến trình từ background sang foreground |
+
+---
+
+### 4. **Chạy file `.sh`**
+
+| Lệnh | Mô tả |
+|------|------|
+| `bash <tên file>` | Chạy file shell script (`*.sh`) |
+| `./<tên file>.sh` | Chạy file nếu đã được cấp quyền thực thi (`chmod +x`) |
 
 ---
 
