@@ -9,6 +9,7 @@ void handle_time(int argc, char* argv[]);
 void handle_ls(int argc, char* argv[]);
 void handle_bash(int argc, char* argv[]);
 void handle_echo_path();
+void handle_run_sh(int argc,char* argv[]);
 void handle_export(int argc, char* argv[]);
 
 // cd

@@ -258,6 +258,30 @@ void handle_echo_path(int argc, char* argv[]) {
     }
 }
 
+void handle_run_sh(int argc, char* argv[]) {
+    if (argc < 2) {
+        printf("Usage: run_sh <filename.sh>\n");
+        return;
+    }
+    char* script_path = find_script_in_env_paths(argv[1]);
+    if (!script_path) {
+        printf("Script '%s' not found in any SCRIPTPATH variables or not executable.\n", argv[1]);
+        return;
+    }
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return;
+    }
+    if (pid == 0) {
+        execl("/bin/bash", "bash", script_path, (char*)NULL);
+        perror("execl");
+        exit(1);
+    } else {
+        waitpid(pid, NULL, 0);
+    }
+}
+
 
 void handle_export(int argc, char* argv[]) {
     if (argc < 2) {

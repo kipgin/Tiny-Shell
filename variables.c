@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "variables.h"
-
+#include <sys/stat.h>
 #define ENV_FILE "env_var.txt"
 
 static ShellVar variables[MAX_VARS];
@@ -56,6 +56,24 @@ void set_variable(const char* name, const char* value) {
         var_count++;
         save_variables();
     }
+}
+
+
+//chi duoc dat la TINYPATH
+char* find_script_in_env_paths(const char* filename) {
+    static char fullpath[512];
+    for (int i = 1; i <= MAX_VARS; ++i) { 
+        char varname[32];
+        snprintf(varname, sizeof(varname), "TINYPATH%d", i);
+        char* dir = get_variable(varname);
+        if (!dir) continue;
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, filename);
+        struct stat st;
+        if (stat(fullpath, &st) == 0 && (st.st_mode & S_IXUSR)) {
+            return fullpath;
+        }
+    }
+    return NULL;
 }
 
 void print_variables() {

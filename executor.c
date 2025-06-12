@@ -21,6 +21,7 @@ bool is_builtin(const char *cmd) {
             strcmp(cmd,"bash") ==0 ||
             strcmp(cmd, "ls") == 0 ||
             strcmp(cmd, "echo") == 0 ||
+            strcmp(cmd,"run_sh") == 0 ||
             strcmp(cmd, "export") == 0 ||
             strcmp(cmd, "jobs") == 0 ||
             strcmp(cmd, "fg") == 0 ||
@@ -65,6 +66,11 @@ int execute_builtin(command_t *cmd) {
             handle_echo_path(argc,cmd->args);
         } else {
             printf("echo failed\n");
+        }
+    }
+    else if(strcmp(cmd->cmd, "run_sh")==0){
+        if(argc > 1){
+            handle_run_sh(argc,cmd->args);
         }
     } 
     else if (strcmp(cmd->cmd, "export") == 0) {

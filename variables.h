@@ -14,6 +14,7 @@ void load_variables();
 void save_variables();
 char* get_variable(const char* name);
 void set_variable(const char* name, const char* value);
+char* find_script_in_env_paths(const char* filename);
 void print_variables();
 
 #endif
