@@ -122,75 +122,62 @@ int setup_redirection(command_t *cmd) {
 }
 
 int execute_command(command_t *cmd) {
-    if (!cmd || !cmd->cmd) return 0;
+    //empty commandAdd commentMore actions
+    if (!cmd || !cmd->cmd) {
+        return 0;  
+    }
+    
+    // check if builtin command :<
+    if (is_builtin(cmd->cmd)) {
+        return execute_builtin(cmd);
+    }
+    
+    // thuc thi may cai lenh chua cai dat --> cho vao execvp(args[0],args)
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return -1;
+    }
+    
+    if (pid == 0) {
+        // tien trinh con
+        
+        // if redirection
 
-    // Nếu là chạy nền (background), mở terminal mới chạy lại ./mysh --internal-run "command args"
-    if (cmd->background) {
-        // Ghép chuỗi command lại
+        if (setup_redirection(cmd) < 0) {
+            exit(1);
+        }
+        // execute command
+        execvp(cmd->cmd, cmd->args);
+        perror("execvp");
+        exit(1);
+    } 
+    else {
+        // tien trinh cha
+        
+        // them process vao danh sach job da cai dat
         char command_str[512] = {0};
-        for (int i = 0; cmd->args[i]; i++) {
-            if (i > 0) strncat(command_str, " ", sizeof(command_str) - strlen(command_str) - 1);
+        strncpy(command_str, cmd->cmd, sizeof(command_str) - 1);
+        for (int i = 1; cmd->args[i] != NULL; i++) {
+            strncat(command_str, " ", sizeof(command_str) - strlen(command_str) - 1);
             strncat(command_str, cmd->args[i], sizeof(command_str) - strlen(command_str) - 1);
         }
+        
 
-        pid_t pid = fork();
-        if (pid < 0) {
-            perror("fork");
+        int job_id = add_job(pid, command_str);
+        if (job_id < 0) {
+            fprintf(stderr, "Failed to add job\n");
             return -1;
         }
-        if (pid == 0) {
-            char cmdline[1024];
-            snprintf(cmdline, sizeof(cmdline), "./mysh --internal-run '%s'", command_str);
-
-            execlp("gnome-terminal", "gnome-terminal", "--", "bash", "-c", cmdline, NULL);
-            perror("execlp gnome-terminal");
-            exit(1);
-        }
-        // if (pid == 0) {
-        //     // Terminal mới gọi lại chính shell để xử lý lệnh
-        //     execlp("gnome-terminal", "gnome-terminal", "--", "./mysh", "--internal-run", command_str, NULL);
-        //     perror("execlp gnome-terminal");
-
-        //     exit(1);
-        // } 
-        else {
-            int job_id = add_job(pid, command_str);
-            // printf("[%d] %d %s &\n", job_id, pid, command_str);
-            return 0;
-        }
-    }
-    else {
-
-        if (is_builtin(cmd->cmd)) {
-            return execute_builtin(cmd);
-        }
-    
-        // External command
-        pid_t pid = fork();
-        if (pid < 0) {
-            perror("fork");
-            return -1;
-        }
-    
-        if (pid == 0) {
-            if (setup_redirection(cmd) < 0) {
-                exit(1);
-            }
-            execvp(cmd->cmd, cmd->args);
-            perror("execvp");
-            exit(1);
+        
+        if (cmd->background) {
+            // Back process
+            printf("[%d] %d %s &\n", job_id, pid, command_str);
+            
         } else {
-            char command_str[512] = {0};
-            strncpy(command_str, cmd->cmd, sizeof(command_str) - 1);
-            for (int i = 1; cmd->args[i]; i++) {
-                strncat(command_str, " ", sizeof(command_str) - strlen(command_str) - 1);
-                strncat(command_str, cmd->args[i], sizeof(command_str) - strlen(command_str) - 1);
-            }
-    
-            int job_id = add_job(pid, command_str);
+            // Foreground process
             bring_to_foreground(job_id);
         }
-    
-        return 0;
     }
+    return 0;
 }
