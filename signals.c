@@ -50,7 +50,7 @@ void sigchld_handler(int sig) {
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
             int job_id=find_job_id_by_pid(pid);
             if (job_id != -1) {
-                printf("\n[Background] Process [%d] finished.\ntinyshell> ", job_id);
+                // printf("\n[Background] Process [%d] finished.\ntinyshell> ", job_id);
                 fflush(stdout);
                 remove_job(pid);
                            
@@ -74,6 +74,4 @@ void init_signals(void) {
     }
 
     signal(SIGCHLD, sigchld_handler);
-
-    
 }
