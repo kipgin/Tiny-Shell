@@ -80,6 +80,7 @@ gcc -o mysh main.c parser.c executor.c jobs.c signals.c builtins.c variables.c -
 |------|------|
 | `bash <tên file>` | Chạy file shell script (`*.sh`) |
 | `./<tên file>.sh` | Chạy file nếu đã được cấp quyền thực thi (`chmod +x`) |
+| `run_sh <tên file>.sh` | Chạy file script mà thư mục cha đã có trong danh sách biến môi trường : `env_var.txt` |
 
 ---
 
