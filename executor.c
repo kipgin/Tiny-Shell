@@ -194,13 +194,45 @@ int execute_command(command_t *cmd) {
     if (!cmd || !cmd->cmd) return 0;
 
     // Nếu là chạy nền (background), mở terminal mới chạy lại ./mysh --internal-run "command args"
-    if (cmd->background && is_builtin(cmd->cmd) == false) {
+    if (is_builtin(cmd->cmd) && cmd->background) {
+    // Ghép chuỗi command lại
+    char command_str[512] = {0};
+    for (int i = 0; cmd->args[i]; i++) {
+        if (i > 0) strncat(command_str, " ", sizeof(command_str) - strlen(command_str) - 1);
+        strncat(command_str, cmd->args[i], sizeof(command_str) - strlen(command_str) - 1);
+    }
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return -1;
+    }
+
+    if (pid == 0) {
+        char cmdline[1024];
+        // snprintf(cmdline, sizeof(cmdline),
+        //     "./mysh --internal-run '%s'; echo '[Done]'; read",
+        //     command_str);
+        snprintf(cmdline, sizeof(cmdline),
+    "source /home/ngoctrung05hd/cell/Tiny-Shell/env_var.txt; ./mysh --internal-run \"%s\"; echo '[Done]'; read",
+    command_str);
+        execlp("xterm", "xterm", "-e", "bash", "-c", cmdline, NULL);
+
+        perror("execlp xterm");
+        exit(1);
+    } else {
+        add_job(pid, command_str);
+        return 0;
+    }
+}
+    if (cmd->background && is_builtin(cmd->cmd)==false) {
         // Ghép chuỗi command lại
         char command_str[512] = {0};
         for (int i = 0; cmd->args[i]; i++) {
             if (i > 0) strncat(command_str, " ", sizeof(command_str) - strlen(command_str) - 1);
             strncat(command_str, cmd->args[i], sizeof(command_str) - strlen(command_str) - 1);
         }
+
 
         pid_t pid = fork();
         if (pid < 0) {
@@ -210,7 +242,6 @@ int execute_command(command_t *cmd) {
         if (pid == 0) {
             char cmdline[1024];
             // snprintf(cmdline, sizeof(cmdline), "./mysh --internal-run '%s'", command_str);
-
             execlp("xterm", "xterm", "-e", "./mysh", "--internal-run", command_str, NULL);
             
             exit(1);
@@ -228,12 +259,11 @@ int execute_command(command_t *cmd) {
             return 0;
         }
     }
-    else if(cmd->background && is_builtin(cmd->cmd)) {
-        // Nếu là lệnh built-in chạy nền, thực thi trực tiếp
-        return execute_builtin(cmd);
-    }
+    // else if(cmd->background && is_builtin(cmd->cmd)) {
+    //     // Nếu là lệnh built-in chạy nền, thực thi trực tiếp
+    //     return execute_builtin(cmd);
+    // }
     else {
-
         if (is_builtin(cmd->cmd)) {
             return execute_builtin(cmd);
         }

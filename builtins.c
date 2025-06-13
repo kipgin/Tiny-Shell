@@ -258,30 +258,66 @@ void handle_echo_path(int argc, char* argv[]) {
     }
 }
 
-void handle_run_sh(int argc, char* argv[]) {
-    if (argc < 2) {
+// void handle_run_sh(int argc, char* argv[]) {
+//     if (argc < 2) {
+//         printf("Usage: run_sh <filename.sh>\n");
+//         return;
+//     }
+//     char* script_path = find_script_in_env_paths(argv[1]);
+//     if (!script_path) {
+//         printf("Script '%s' not found in any SCRIPTPATH variables or not executable.\n", argv[1]);
+//         return;
+//     }
+//     pid_t pid = fork();
+//     if (pid < 0) {
+//         perror("fork");
+//         return;
+//     }
+//     if (pid == 0) {
+//         execl("/bin/bash", "bash", script_path, (char*)NULL);
+//         perror("execl");
+//         exit(1);
+//     } else {
+//         waitpid(pid, NULL, 0);
+//     }
+// }
+
+
+void handle_run_sh(int argc, char*argv[]){
+    if(argc <2 || argc >=3 ){
         printf("Usage: run_sh <filename.sh>\n");
         return;
     }
-    char* script_path = find_script_in_env_paths(argv[1]);
-    if (!script_path) {
-        printf("Script '%s' not found in any SCRIPTPATH variables or not executable.\n", argv[1]);
-        return;
-    }
-    pid_t pid = fork();
-    if (pid < 0) {
-        perror("fork");
-        return;
-    }
-    if (pid == 0) {
-        execl("/bin/bash", "bash", script_path, (char*)NULL);
-        perror("execl");
-        exit(1);
-    } else {
-        waitpid(pid, NULL, 0);
-    }
-}
+    char*filename=argv[1];
+    char fullpath[512];
+    char varname[32];
+    for (int i = 1; i <= 10; i++) {
+        snprintf(varname, sizeof(varname), "TINYPATH%d", i);
+        char *dir = getenv(varname);
+        if (!dir) continue;
 
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, filename);
+        if (access(fullpath, X_OK) == 0) {
+            // Tìm thấy file, chạy
+            pid_t pid = fork();
+            if (pid == 0) {
+                execlp("bash", "bash", fullpath, NULL);
+                perror("execlp bash");
+                exit(1);
+            } else if (pid > 0) {
+                int status;
+                waitpid(pid, &status, 0);
+                return ;
+            } else {
+                perror("fork");
+                return ;
+            }
+        }
+    }
+
+    fprintf(stderr, "Script '%s' not found in any TINYPATH variables or not executable.\n", filename);
+    return ;
+}
 
 void handle_export(int argc, char* argv[]) {
     if (argc < 2) {

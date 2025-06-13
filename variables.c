@@ -3,10 +3,24 @@
 #include <string.h>
 #include "variables.h"
 #include <sys/stat.h>
+#include <unistd.h>
 #define ENV_FILE "env_var.txt"
 
 static ShellVar variables[MAX_VARS];
 static int var_count = 0;
+
+// void load_variables() {
+//     FILE *file = fopen(ENV_FILE, "r");
+//     if (!file) return;
+
+//     var_count = 0;
+//     while (fscanf(file, "%63[^=]=%255[^\n]\n", variables[var_count].name, variables[var_count].value) == 2) {
+//         var_count++;
+//         if (var_count >= MAX_VARS) break;
+//     }
+
+//     fclose(file);
+// }
 
 void load_variables() {
     FILE *file = fopen(ENV_FILE, "r");
@@ -14,6 +28,7 @@ void load_variables() {
 
     var_count = 0;
     while (fscanf(file, "%63[^=]=%255[^\n]\n", variables[var_count].name, variables[var_count].value) == 2) {
+        setenv(variables[var_count].name, variables[var_count].value, 1); 
         var_count++;
         if (var_count >= MAX_VARS) break;
     }
@@ -60,22 +75,40 @@ void set_variable(const char* name, const char* value) {
 
 
 //chi duoc dat la TINYPATH
+
+// char* find_script_in_env_paths(const char* filename) {
+//     static char fullpath[512];
+//     for (int i = 1; i <= MAX_VARS; ++i) { 
+//         char varname[32];
+//         snprintf(varname, sizeof(varname), "TINYPATH%d", i);
+//         char* dir = get_variable(varname);
+//         if (!dir) continue;
+//         snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, filename);
+//         struct stat st;
+//         if (stat(fullpath, &st) == 0 && (st.st_mode & S_IXUSR)) {
+//             return fullpath;
+//         }
+//     }
+//     return NULL;
+// }
+
 char* find_script_in_env_paths(const char* filename) {
     static char fullpath[512];
-    for (int i = 1; i <= MAX_VARS; ++i) { 
-        char varname[32];
+    char varname[32];
+
+    for (int i = 1; i <= 10; i++) {
         snprintf(varname, sizeof(varname), "TINYPATH%d", i);
-        char* dir = get_variable(varname);
+        char* dir = getenv(varname);
         if (!dir) continue;
+
         snprintf(fullpath, sizeof(fullpath), "%s/%s", dir, filename);
-        struct stat st;
-        if (stat(fullpath, &st) == 0 && (st.st_mode & S_IXUSR)) {
+        if (access(fullpath, X_OK) == 0) {
             return fullpath;
         }
     }
-    return NULL;
-}
 
+    return NULL; // Không tìm thấy
+}
 void print_variables() {
     for (int i = 0; i < var_count; i++) {
         printf("%s=%s\n", variables[i].name, variables[i].value);
