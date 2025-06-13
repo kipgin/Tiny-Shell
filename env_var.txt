@@ -1,1 +1,1 @@
-TINYPATH1=/workspaces/Tiny-Shell/test_lan2
+TINYPATH1=/workspaces/Tiny-Shell/test_lan1
