@@ -1,6 +1,6 @@
 #!/bin/bash
 
-total_seconds=${1:-20}  
+total_seconds=${1:-200}  
 
 while [ $total_seconds -gt 0 ]; do
   minutes=$((total_seconds / 60))

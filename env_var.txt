@@ -1,1 +1,3 @@
 TINYPATH1=/workspaces/Tiny-Shell/test_lan2
+TINYPATH3=/workspaces/Tiny-Shell/test_lan1
+TINYPATH2=/home/ngoctrung05hd/cell/Tiny-Shell/test_lan1
